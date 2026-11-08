@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="Graph.WinUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:plot="using:ScottPlot.WinUI"
+    Title="Graph">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+
+    <Grid
+        x:Name="RootGrid"
+        Background="{ThemeResource LayerFillColorDefaultBrush}"
+        ColumnDefinitions="250,*"
+        RowDefinitions="50,*">
+
+        <Grid
+            x:Name="AppTitleBar"
+            Grid.Row="0"
+            Grid.ColumnSpan="2"
+            ColumnDefinitions="138,*,138">
+            <StackPanel
+                Grid.Column="0"
+                Margin="16,0,0,0"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="8">
+                <FontIcon Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Glyph="&#xE9D2;" />
+                <TextBlock VerticalAlignment="Center" Text="Graph" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="6">
+                <TextBox
+                    Width="300"
+                    VerticalAlignment="Center"
+                    PlaceholderText="Функция, например sin(x)"
+                    Text="{x:Bind ViewModel.Function, Mode=TwoWay}" />
+
+                <Button
+                    x:Name="FunctionHelpButton"
+                    Width="32"
+                    Height="32"
+                    Padding="0"
+                    AutomationProperties.Name="Справка по математическим функциям"
+                    Click="FunctionHelpButton_Click"
+                    Style="{StaticResource SubtleButtonStyle}"
+                    ToolTipService.ToolTip="Справка по синтаксису">
+                    <Button.Resources>
+                        <TeachingTip
+                            x:Name="FunctionHelpTip"
+                            Title="Основные обозначения"
+                            IsLightDismissEnabled="True"
+                            PreferredPlacement="Bottom"
+                            Target="{x:Bind FunctionHelpButton}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="/ — деление" />
+                                <TextBlock Text="^ — возведение в степень" />
+                                <TextBlock Text="sin(x) — синус" />
+                                <TextBlock Text="cos(x) — косинус" />
+                                <TextBlock Text="tg(x) — тангенс" />
+                                <TextBlock Text="sqrt(x) — квадратный корень" />
+                                <TextBlock Text="abs(x) — модуль" />
+                                <TextBlock Text="pi — число π" />
+                                <TextBlock Text="e — число e" />
+                                <TextBlock Text="ln(x) — натуральный логарифм" />
+                                <TextBlock Text="log10(x) — десятичный логарифм" />
+                            </StackPanel>
+                        </TeachingTip>
+                    </Button.Resources>
+                    <FontIcon FontSize="14" Glyph="&#xE897;" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="16,18" Spacing="16">
+
+                <TextBox Header="Минимальный X" Text="{x:Bind ViewModel.XMin, Mode=TwoWay}" />
+
+                <TextBox Header="Максимальный X" Text="{x:Bind ViewModel.XMax, Mode=TwoWay}" />
+
+                <TextBox Header="Минимальный Y" Text="{x:Bind ViewModel.YMin, Mode=TwoWay}" />
+
+                <TextBox Header="Максимальный Y" Text="{x:Bind ViewModel.YMax, Mode=TwoWay}" />
+
+                <TextBox Header="Интервал по X" Text="{x:Bind ViewModel.XInterval, Mode=TwoWay}" />
+
+                <TextBox Header="Интервал по Y" Text="{x:Bind ViewModel.YInterval, Mode=TwoWay}" />
+
+                <TextBox Header="Плотность точек (H)" Text="{x:Bind ViewModel.Step, Mode=TwoWay}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid
+            x:Name="Workspace"
+            Grid.Row="1"
+            Grid.Column="1"
+            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+            CornerRadius="8,0,0,0"
+            RowDefinitions="auto,*">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                <TextBlock
+                    Grid.Column="0"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="Параметры графика" />
+
+                <CommandBar
+                    Grid.Column="1"
+                    Background="Transparent"
+                    DefaultLabelPosition="Right"
+                    IsOpen="False">
+                    <AppBarButton
+                        IsCompact="True"
+                        Label="Цвет"
+                        ToolTipService.ToolTip="Выбрать цвет графика">
+                        <AppBarButton.Icon>
+                            <FontIcon FontSize="14" Glyph="&#xE790;" />
+                        </AppBarButton.Icon>
+                        <AppBarButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem
+                                    Click="ColorSwatch_Click"
+                                    Tag="#A8A8A8"
+                                    Text="Серый">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="#A8A8A8"
+                                            Glyph="&#xE747;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    Click="ColorSwatch_Click"
+                                    Tag="#9983C0"
+                                    Text="Фиолетовый">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="#9983C0"
+                                            Glyph="&#xE747;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    Click="ColorSwatch_Click"
+                                    Tag="#FF99A4"
+                                    Text="Розовый">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="#FF99A4"
+                                            Glyph="&#xE747;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    Click="ColorSwatch_Click"
+                                    Tag="#6CCB5F"
+                                    Text="Зелёный">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="#6CCB5F"
+                                            Glyph="&#xE747;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    Click="ColorSwatch_Click"
+                                    Tag="#76B9ED"
+                                    Text="Голубой">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="#76B9ED"
+                                            Glyph="&#xE747;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem
+                                    Click="ColorSwatch_Click"
+                                    Tag="#FCE100"
+                                    Text="Жёлтый">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon
+                                            FontSize="16"
+                                            Foreground="#FCE100"
+                                            Glyph="&#xE747;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+
+                    <AppBarButton
+                        Command="{x:Bind ViewModel.ApplyAxesCommand}"
+                        IsCompact="True"
+                        Label="Разметить"
+                        ToolTipService.ToolTip="Разметить оси">
+                        <AppBarButton.Icon>
+                            <FontIcon FontSize="14" Glyph="&#xE929;" />
+                        </AppBarButton.Icon>
+                    </AppBarButton>
+
+                    <AppBarButton
+                        Command="{x:Bind ViewModel.PlotCommand}"
+                        IsCompact="True"
+                        Label="Построить"
+                        ToolTipService.ToolTip="Построить график">
+                        <AppBarButton.Icon>
+                            <FontIcon FontSize="14" Glyph="&#xE70F;" />
+                        </AppBarButton.Icon>
+                    </AppBarButton>
+
+                    <AppBarSeparator />
+
+
+                    <AppBarButton
+                        Command="{x:Bind ViewModel.ClearCommand}"
+                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                        IsCompact="True"
+                        Label="Удалить"
+                        ToolTipService.ToolTip="Удалить график">
+                        <AppBarButton.Icon>
+                            <FontIcon FontSize="14" Glyph="&#xE74D;" />
+                        </AppBarButton.Icon>
+                    </AppBarButton>
+
+                </CommandBar>
+
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <plot:WinUIPlot x:Name="PlotControl" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
